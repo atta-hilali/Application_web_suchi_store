@@ -1,72 +1,205 @@
 # Miya Sushi
 
-Application complète pour restaurant sushi, construite avec Laravel 11, React 18 et Vite.
+Application web complete pour un restaurant de sushi, construite avec Laravel 11, React 18 et Vite.
 
-Le projet reprend le design premium du frontend fourni dans `websushi.html`, mais remplace tout l'état simulé par un vrai backend Laravel avec :
+Le projet reprend un frontend premium de restaurant japonais et le transforme en application complete avec :
 
-- authentification client/admin
+- backend Laravel reel
+- base de donnees relationnelle
+- authentification client et admin
 - gestion des commandes
-- tableau de bord admin
-- gestion admin des produits et catégories
-- base de données relationnelle avec seeders
-- API REST JSON
+- tableau de bord administrateur
+- CRUD produits et categories
 - tests fonctionnels
+- configuration prete pour un deploiement
 
-## Stack
+## Sommaire
+
+- [Apercu](#apercu)
+- [Fonctionnalites](#fonctionnalites)
+- [Stack technique](#stack-technique)
+- [Architecture du projet](#architecture-du-projet)
+- [Pre-requis](#pre-requis)
+- [Installation depuis zero](#installation-depuis-zero)
+- [Configuration de la base de donnees](#configuration-de-la-base-de-donnees)
+- [Lancer le projet en local](#lancer-le-projet-en-local)
+- [Comptes de demonstration](#comptes-de-demonstration)
+- [Commandes utiles](#commandes-utiles)
+- [Tests](#tests)
+- [Routes API principales](#routes-api-principales)
+- [Deploiement](#deploiement)
+- [Checklist avant mise en production](#checklist-avant-mise-en-production)
+- [Depannage](#depannage)
+
+## Apercu
+
+Le site "Miya Sushi" permet :
+
+- d'afficher une page d'accueil premium
+- de consulter la carte par categories
+- de creer un compte client
+- de se connecter et commander
+- de choisir livraison ou retrait sur place
+- de suivre ses commandes
+- de gerer les commandes, produits et categories depuis un espace admin
+
+Le projet utilise une SPA React servie par Laravel, avec authentification Sanctum en mode cookie/session.
+
+## Fonctionnalites
+
+### Cote visiteur
+
+- page d'accueil avec hero section
+- navigation vers le menu
+- consultation des produits par categories
+- affichage des produits "Nouveau"
+
+### Cote client
+
+- inscription
+- connexion / deconnexion
+- panier frontend
+- ajout, retrait et modification des quantites
+- choix du mode :
+  - livraison
+  - takeaway
+- adresse obligatoire en cas de livraison
+- ajout de commentaires
+- creation de commande en base
+- consultation de "Mes Commandes"
+- suivi des statuts de commande
+
+### Cote administrateur
+
+- connexion admin
+- tableau de bord avec statistiques
+- consultation de toutes les commandes
+- acceptation ou refus des commandes
+- gestion complete des produits
+- gestion complete des categories
+- activation / desactivation d'un produit
+
+## Stack technique
 
 - PHP 8.2+
 - Laravel 11
 - React 18
 - Vite 6
-- Sanctum en mode SPA cookie/session
-- MySQL par défaut
-- SQLite supporté pour le local et les tests
+- Laravel Sanctum
+- MySQL par defaut
+- SQLite possible pour certains tests ou usages locaux
 
-## Fonctionnalités
+## Architecture du projet
 
-- Accueil premium Miya Sushi
-- Carte produits alimentée par la base de données
-- Catégories `menu`, `specialty`, `new`
-- Inscription / connexion / déconnexion
-- Panier côté frontend
-- Commandes livraison ou à emporter
-- Validation d'adresse obligatoire pour la livraison
-- Historique "Mes Commandes"
-- Statuts de commande
-- Dashboard admin avec statistiques
-- Acceptation / refus des commandes
-- CRUD admin produits et catégories
-- Upload image produit ou URL distante
+### Backend Laravel
 
-## Prérequis
+- `app/Enums`
+  - roles utilisateur
+  - statuts de commande
+  - types de livraison
+- `app/Http/Controllers/Api`
+  - endpoints publics
+  - endpoints clients
+  - endpoints admin
+- `app/Http/Requests`
+  - validation centralisee
+- `app/Http/Resources`
+  - reponses JSON structurees
+- `app/Policies`
+  - autorisations sur les commandes
+- `app/Services/OrderService.php`
+  - logique metier de creation de commande
+- `database/migrations`
+  - structure SQL complete
+- `database/seeders`
+  - donnees de demo
 
-- PHP 8.2 ou supérieur
+### Frontend React
+
+- `resources/js/app.jsx`
+  - point d'entree Vite
+- `resources/js/MiyaSushiApp.jsx`
+  - composant principal de l'application
+- `resources/js/components`
+  - composants UI du site
+- `resources/js/lib/api.js`
+  - appels API Axios
+- `resources/css/app.css`
+  - styles principaux
+- `resources/views/app.blade.php`
+  - shell Blade qui charge la SPA
+
+### Utilitaires
+
+- `start-built.bat`
+  - lancement rapide Windows en mode build
+- `start-dev.bat`
+  - lancement rapide Windows en mode developpement
+- `LOCAL-LAUNCH.md`
+  - aide rapide pour l'execution locale
+- `scripts/record-demo.mjs`
+  - script optionnel pour enregistrer une video de demonstration
+
+## Pre-requis
+
+Avant de lancer le projet, il faut disposer de :
+
+- PHP 8.2 ou plus recent
 - Composer
 - Node.js 20+ et npm
-- MySQL 8+ ou SQLite
+- MySQL 8+ ou MariaDB
 
-Note Windows :
+Option Windows / XAMPP :
 
-- dans cet environnement, les commandes PHP ont été exécutées avec `C:\xampp\php\php.exe`
-- l'extension PHP `zip` doit être activée pour accélérer Composer
+- PHP peut etre lance avec `C:\xampp\php\php.exe`
+- MySQL peut etre fourni par XAMPP
 
-## Installation
+## Installation depuis zero
+
+### 1. Cloner le projet
+
+```bash
+git clone <url-du-depot>
+cd Application_web_suchi_store
+```
+
+### 2. Installer les dependances backend
 
 ```bash
 composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate --seed
-npm install
-npm run build
-php artisan serve
 ```
 
-## Configuration `.env`
+### 3. Installer les dependances frontend
 
-Le fichier `.env.example` est configuré pour MySQL par défaut.
+```bash
+npm install
+```
 
-Exemple MySQL :
+### 4. Creer le fichier d'environnement
+
+Sous Linux / macOS :
+
+```bash
+cp .env.example .env
+```
+
+Sous Windows PowerShell :
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### 5. Generer la cle d'application
+
+```bash
+php artisan key:generate
+```
+
+### 6. Configurer la base de donnees
+
+Modifier `.env` avec vos informations MySQL.
+
+Exemple :
 
 ```env
 DB_CONNECTION=mysql
@@ -77,82 +210,180 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Exemple SQLite local :
+### 7. Creer les tables et les donnees de demo
+
+```bash
+php artisan migrate --seed
+```
+
+### 8. Creer le lien symbolique du stockage public
+
+```bash
+php artisan storage:link
+```
+
+### 9. Construire les assets frontend
+
+```bash
+npm run build
+```
+
+### 10. Lancer le serveur Laravel
+
+```bash
+php artisan serve
+```
+
+Puis ouvrir :
+
+- `http://127.0.0.1:8000`
+
+## Configuration de la base de donnees
+
+### Option recommandee : MySQL
+
+Le projet est pense en priorite pour MySQL.
+
+Exemple `.env` :
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=miya_sushi
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### Option alternative : SQLite
+
+Pour un usage local simple :
 
 ```env
 DB_CONNECTION=sqlite
 DB_DATABASE=database/database.sqlite
 ```
 
-Si vous utilisez SQLite localement :
+Puis creer le fichier SQLite si besoin :
 
 ```bash
 php -r "file_exists('database/database.sqlite') || touch('database/database.sqlite');"
 ```
 
-Variables utiles déjà prévues :
+## Lancer le projet en local
 
-- `SANCTUM_STATEFUL_DOMAINS`
-- `CORS_ALLOWED_ORIGINS`
-- `FILESYSTEM_DISK=public`
+### Methode classique
 
-## Démarrage local
-
-### Backend
+Terminal 1 :
 
 ```bash
 php artisan serve
 ```
 
-### Frontend en mode dev
+Terminal 2 pour le mode dev frontend :
 
 ```bash
 npm run dev
 ```
 
-### Build production
+Puis ouvrir :
+
+- `http://127.0.0.1:8000`
+
+### Mode build stable
+
+Si vous voulez tester la version build :
 
 ```bash
 npm run build
+php artisan serve
 ```
 
-## Base de données et seeders
+### Lancement rapide Windows
 
-Les seeders créent :
+Version build :
 
-- catégories :
-  - `Menu Classique`
-  - `Spécialités`
-  - `Nouveautés`
-- les 9 produits du frontend source
-- réglages restaurant
-- un administrateur
-- un client démo
-
-Commandes utiles :
-
-```bash
-php artisan migrate:fresh --seed
-php artisan storage:link
+```bat
+start-built.bat
 ```
 
-## Comptes par défaut
+Version dev :
 
-Admin :
+```bat
+start-dev.bat
+```
+
+## Comptes de demonstration
+
+### Administrateur
 
 - email : `admin@gmail.com`
 - mot de passe : `123`
 
-Client démo :
+### Client
 
 - email : `client@gmail.com`
 - mot de passe : `12345678`
 
 Important :
 
-- changez immédiatement le mot de passe admin en production
+- changez immediatement le mot de passe admin en production
 
-## Routes API
+## Commandes utiles
+
+Reinitialiser totalement la base :
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Nettoyer les caches Laravel :
+
+```bash
+php artisan optimize:clear
+```
+
+Recreer le lien storage :
+
+```bash
+php artisan storage:link
+```
+
+Compiler le frontend :
+
+```bash
+npm run build
+```
+
+Mode developpement frontend :
+
+```bash
+npm run dev
+```
+
+## Tests
+
+La suite de tests couvre les flux critiques suivants :
+
+1. inscription client
+2. connexion client
+3. connexion admin
+4. listing public des produits
+5. creation d'une commande
+6. protection contre les faux prix frontend
+7. interdiction d'acces a la commande d'un autre client
+8. listing admin de toutes les commandes
+9. acceptation admin d'une commande
+10. refus admin d'une commande
+11. refus d'acces admin pour un utilisateur non admin
+
+Lancer les tests :
+
+```bash
+php artisan test
+```
+
+## Routes API principales
 
 ### Public
 
@@ -164,7 +395,7 @@ Important :
 - `POST /api/register`
 - `POST /api/login`
 
-### Authentifié
+### Authentifie
 
 - `POST /api/logout`
 - `GET /api/me`
@@ -190,124 +421,131 @@ Important :
 - `PUT /api/admin/categories/{category}`
 - `DELETE /api/admin/categories/{category}`
 
-## Payload création de commande
+## Deploiement
 
-```json
-{
-  "delivery_type": "delivery",
-  "delivery_address": "123 rue exemple",
-  "comments": "No wasabi please",
-  "items": [
-    {
-      "product_id": 1,
-      "quantity": 2
-    },
-    {
-      "product_id": 4,
-      "quantity": 1
-    }
-  ]
-}
-```
+Le projet est pret pour un deploiement sur :
 
-Le backend :
+- VPS Ubuntu + Nginx
+- VPS Ubuntu + Apache
+- hebergement mutualise compatible Laravel
+- environnement avec MySQL et execution de commandes Composer / Artisan
 
-- recharge les produits depuis la base
-- vérifie la disponibilité
-- calcule `subtotal`, `delivery_fee`, `total`
-- snapshotte `product_name` et `product_price`
-- crée la commande dans une transaction SQL
+### Fichier d'environnement de production
 
-## Architecture
-
-Backend :
-
-- `app/Enums` : rôles, statuts, types de livraison
-- `app/Http/Controllers/Api` : endpoints publics, client et admin
-- `app/Http/Requests` : validation
-- `app/Http/Resources` : réponses JSON
-- `app/Policies` : autorisation par commande
-- `app/Services/OrderService.php` : logique de création de commande
-
-Frontend :
-
-- `resources/js/App.jsx`
-- `resources/js/components/*`
-- `resources/css/app.css`
-- `resources/views/app.blade.php`
-
-## Tests
-
-Les tests couvrent :
-
-1. inscription client
-2. connexion client
-3. connexion admin
-4. listing public des produits
-5. création de commande client
-6. protection contre les faux prix frontend
-7. interdiction d'accès à la commande d'un autre client
-8. listing admin des commandes
-9. acceptation admin d'une commande
-10. refus admin d'une commande
-11. refus d'accès admin pour un non-admin
-
-Lancer les tests :
-
-```bash
-php artisan test
-```
-
-## Déploiement
-
-Checklist production :
-
-1. renseigner un vrai `.env`
-   - vous pouvez partir de `/.env.production.example`
-2. définir `APP_ENV=production`
-3. définir `APP_DEBUG=false`
-4. configurer la base MySQL
-5. exécuter `composer install --no-dev --optimize-autoloader`
-6. exécuter `php artisan migrate --force`
-7. exécuter `php artisan storage:link`
-8. exécuter `npm install && npm run build`
-9. exécuter :
-
-```bash
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
-
-10. vérifier que `public/` est bien le document root
-11. vérifier les permissions d'écriture pour `storage/` et `bootstrap/cache/`
-12. si vous ajoutez plus tard des notifications/jobs, configurer un worker queue
-
-### Modèle `.env` production
-
-Un modèle prêt à remplir est disponible ici :
+Un modele existe deja :
 
 - `.env.production.example`
 
-Usage recommandé :
+Procedure recommandee :
 
 ```bash
 cp .env.production.example .env
 php artisan key:generate
 ```
 
-## Dépannage
+### Variables importantes en production
 
-### `Session store not set on request`
+- `APP_ENV=production`
+- `APP_DEBUG=false`
+- `APP_URL=https://votre-domaine.com`
+- `DB_CONNECTION=mysql`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_DATABASE`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `SESSION_DOMAIN`
+- `SANCTUM_STATEFUL_DOMAINS`
+- `CORS_ALLOWED_ORIGINS`
 
-Vérifiez que :
+### Commandes de deploiement
 
-- les routes SPA/API passent bien par Sanctum + middleware `web`
-- le cookie/session est autorisé sur votre domaine local
+Depuis un serveur propre :
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm install
+npm run build
+php artisan migrate --force
+php artisan db:seed --force
+php artisan storage:link
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+### Configuration serveur
+
+Verifier que :
+
+- le document root pointe vers `public/`
+- `storage/` est inscriptible
+- `bootstrap/cache/` est inscriptible
+- HTTPS est actif
+- MySQL est disponible
+
+### Si vous utilisez des cookies de session et Sanctum
+
+Verifier la coherence de :
+
+- `APP_URL`
+- `SESSION_DOMAIN`
+- `SESSION_SECURE_COOKIE`
+- `SANCTUM_STATEFUL_DOMAINS`
+- `CORS_ALLOWED_ORIGINS`
+
+### Deployment checklist
+
+1. creer la base MySQL
+2. renseigner `.env`
+3. lancer `composer install --no-dev --optimize-autoloader`
+4. lancer `npm install`
+5. lancer `npm run build`
+6. lancer `php artisan migrate --force`
+7. lancer `php artisan db:seed --force`
+8. lancer `php artisan storage:link`
+9. lancer `php artisan config:cache`
+10. lancer `php artisan route:cache`
+11. lancer `php artisan view:cache`
+12. verifier le document root `public/`
+13. changer le mot de passe admin par defaut
+
+## Checklist avant mise en production
+
+Avant d'envoyer le projet chez un client ou en production, verifier :
+
+- le mot de passe admin a ete change
+- les comptes de demo sont supprimes ou modifies si necessaire
+- `APP_DEBUG=false`
+- les identifiants MySQL de production sont corrects
+- le stockage public fonctionne
+- la connexion / inscription fonctionnent sur le vrai domaine
+- la creation de commande fonctionne
+- l'admin peut accepter et refuser une commande
+- les assets frontend sont bien construits
+
+## Depannage
+
+### `CSRF token mismatch`
+
+Verifier :
+
+- que le domaine local utilise est bien celui configure
+- que les cookies du navigateur sont propres
+- que Sanctum et la session utilisent les bons domaines
+
+### `Unauthenticated`
+
+Verifier :
+
+- que l'utilisateur est bien connecte
+- que le cookie de session est present
+- que l'URL du front et de l'API est coherente
 
 ### `Database file does not exist`
 
-Pour SQLite :
+Si vous utilisez SQLite :
 
 ```bash
 php -r "file_exists('database/database.sqlite') || touch('database/database.sqlite');"
@@ -319,7 +557,7 @@ php -r "file_exists('database/database.sqlite') || touch('database/database.sqli
 composer dump-autoload
 ```
 
-### Les images uploadées ne s'affichent pas
+### Les images uploades ne s'affichent pas
 
 ```bash
 php artisan storage:link
@@ -332,11 +570,17 @@ npm install
 npm run dev
 ```
 
-## Vérifications effectuées
+## Resume
 
-Commandes exécutées pendant l'intégration :
+Vous avez ici une application complete de restaurant sushi avec :
 
-- `php artisan migrate:fresh --seed`
-- `php artisan test`
-- `npm run build`
-- `php artisan storage:link`
+- frontend React integre dans Laravel
+- backend Laravel structure
+- authentification client / admin
+- gestion de commandes
+- panneau admin
+- tests
+- base de donnees
+- documentation de lancement et de deploiement
+
+Le projet peut etre lance localement, teste rapidement, puis deploye sur un hebergement standard Laravel/MySQL.
