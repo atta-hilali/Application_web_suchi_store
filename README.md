@@ -4,6 +4,12 @@ Application web complete pour un restaurant de sushi, construite avec Laravel 12
 
 Les commandes utilisent TND (3 decimales) et l'heure de Tunis. Voir [OPERATIONS.md](OPERATIONS.md) pour les parametres de livraison/horaires, les alertes et la procedure de mise a jour.
 
+## Guide hébergement et prérequis
+
+**Client, hébergeur ou développeur chargé de l'installation : [ouvrir le guide hébergement et prérequis](guide-hebergement-et-prerequis/README.md).**
+
+Ce guide présente les exigences du serveur, les étapes d'installation, la création du compte administrateur, les médias, les sauvegardes et les vérifications de mise en ligne. L'hébergement et l'installation sont à la charge du client selon l'accord de livraison.
+
 Le projet reprend un frontend premium de restaurant japonais et le transforme en application complete avec :
 
 - backend Laravel reel
@@ -17,6 +23,7 @@ Le projet reprend un frontend premium de restaurant japonais et le transforme en
 
 ## Sommaire
 
+- [Guide hébergement et prérequis](guide-hebergement-et-prerequis/README.md)
 - [Apercu](#apercu)
 - [Fonctionnalites](#fonctionnalites)
 - [Stack technique](#stack-technique)
@@ -429,93 +436,11 @@ php artisan test
 
 ## Deploiement
 
-Le projet est pret pour un deploiement sur :
+La procedure d'installation de production est disponible dans le [Guide hébergement et prérequis](guide-hebergement-et-prerequis/README.md).
 
-- VPS Ubuntu + Nginx
-- VPS Ubuntu + Apache
-- hebergement mutualise compatible Laravel
-- environnement avec MySQL et execution de commandes Composer / Artisan
+Elle couvre une installation vierge et la reprise d'une base existante, avec les variables d'environnement, la compilation des assets, le stockage persistant et les sauvegardes. Utiliser cette procedure pour la mise en ligne client ; les instructions de lancement local et les comptes de demonstration de ce README servent aux essais.
 
-### Fichier d'environnement de production
-
-Un modele existe deja :
-
-- `.env.production.example`
-
-Procedure recommandee :
-
-```bash
-cp .env.production.example .env
-php artisan key:generate
-```
-
-### Variables importantes en production
-
-- `APP_ENV=production`
-- `APP_DEBUG=false`
-- `APP_URL=https://votre-domaine.com`
-- `DB_CONNECTION=mysql`
-- `DB_HOST`
-- `DB_PORT`
-- `DB_DATABASE`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `SESSION_DOMAIN`
-- `SANCTUM_STATEFUL_DOMAINS`
-- `CORS_ALLOWED_ORIGINS`
-
-### Commandes de deploiement
-
-Depuis un serveur propre :
-
-```bash
-composer install --no-dev --optimize-autoloader
-npm install
-npm run build
-php artisan migrate --force
-php artisan db:seed --force
-php artisan storage:link
-php artisan optimize:clear
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
-
-### Configuration serveur
-
-Verifier que :
-
-- le document root pointe vers `public/`
-- `storage/` est inscriptible
-- `bootstrap/cache/` est inscriptible
-- HTTPS est actif
-- MySQL est disponible
-
-### Si vous utilisez des cookies de session et Sanctum
-
-Verifier la coherence de :
-
-- `APP_URL`
-- `SESSION_DOMAIN`
-- `SESSION_SECURE_COOKIE`
-- `SANCTUM_STATEFUL_DOMAINS`
-- `CORS_ALLOWED_ORIGINS`
-
-### Deployment checklist
-
-1. creer la base MySQL
-2. renseigner `.env`
-3. lancer `composer install --no-dev --optimize-autoloader`
-4. lancer `npm install`
-5. lancer `npm run build`
-6. lancer `php artisan migrate --force`
-7. lancer `php artisan db:seed --force`
-8. lancer `php artisan storage:link`
-9. lancer `php artisan config:cache`
-10. lancer `php artisan route:cache`
-11. lancer `php artisan view:cache`
-12. verifier le document root `public/`
-13. changer le mot de passe admin par defaut
+Pour le fonctionnement de l'administration et des commandes, consulter [OPERATIONS.md](OPERATIONS.md).
 
 ## Checklist avant mise en production
 
