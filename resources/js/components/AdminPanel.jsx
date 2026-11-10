@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import OrderCard from './OrderCard';
 import ProductSalesChart from './ProductSalesChart';
+import RestaurantSettings from './RestaurantSettings';
+import HeroMediaSettings from './HeroMediaSettings';
+import { formatMoney } from '../lib/money';
 
 const initialProductForm = {
     category_id: '',
@@ -34,6 +37,8 @@ export default function AdminPanel({
     onToggleProductAvailability,
     onSaveCategory,
     onDeleteCategory,
+    restaurantSettings,
+    onSettingsSaved,
 }) {
     const [activeSection, setActiveSection] = useState('orders');
     const [editingProductId, setEditingProductId] = useState(null);
@@ -116,7 +121,7 @@ export default function AdminPanel({
                         <div className="stat-label">En Attente</div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-value">{Number(dashboard.today_revenue ?? 0).toFixed(2)}€</div>
+                        <div className="stat-value">{formatMoney(dashboard.today_revenue)}</div>
                         <div className="stat-label">Revenus du Jour</div>
                     </div>
                     <div className="stat-card">
@@ -137,9 +142,13 @@ export default function AdminPanel({
                     <button type="button" className={activeSection === 'categories' ? 'tab active' : 'tab'} onClick={() => setActiveSection('categories')}>
                         Catégories
                     </button>
+                    <button type="button" className={activeSection === 'settings' ? 'tab active' : 'tab'} onClick={() => setActiveSection('settings')}>Paramètres</button>
+                    <button type="button" className={activeSection === 'hero' ? 'tab active' : 'tab'} onClick={() => setActiveSection('hero')}>Fond d’accueil</button>
                 </div>
             </div>
 
+            {activeSection === 'settings' && restaurantSettings && <RestaurantSettings settings={restaurantSettings} onSaved={onSettingsSaved} />}
+            {activeSection === 'hero' && restaurantSettings?.hero_media && <HeroMediaSettings media={restaurantSettings.hero_media} onSaved={media => onSettingsSaved({ ...restaurantSettings, hero_media: media })} />}
             {activeSection === 'orders' && (
                 <>
                     <h3 className="section-title admin-section-title">Toutes les Commandes</h3>
@@ -151,7 +160,7 @@ export default function AdminPanel({
                                     <div key={order.id} className="mini-order-card">
                                         <strong>{order.order_number}</strong>
                                         <span>{order.customer_email ?? order.customer?.email}</span>
-                                        <span>{Number(order.total).toFixed(2)}€</span>
+                                        <span>{formatMoney(order.total, order.currency)}</span>
                                     </div>
                                 ))}
                             </div>
@@ -225,7 +234,8 @@ export default function AdminPanel({
                                     <label className="form-label">Prix</label>
                                     <input
                                         type="number"
-                                        step="0.01"
+                                        step="0.001"
+                                        max="99999.999"
                                         min="0"
                                         className="form-input"
                                         value={productForm.price}
@@ -301,7 +311,7 @@ export default function AdminPanel({
                                     <div>
                                         <div className="manager-item-title">{product.name}</div>
                                         <div className="manager-item-meta">
-                                            {product.category?.name ?? product.category_slug} - {Number(product.price).toFixed(2)}€
+                                            {product.category?.name ?? product.category_slug} - {formatMoney(product.price)}
                                         </div>
                                         <div className="manager-item-meta">
                                             {product.is_available ? 'Disponible' : 'Indisponible'}

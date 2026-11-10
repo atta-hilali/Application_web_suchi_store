@@ -1,3 +1,5 @@
+import { formatMoney } from '../lib/money';
+
 export default function ProductCard({ item, isLoggedIn, isAdmin, onAddToCart }) {
     const imageUrl = item.image_full_url || item.image_url;
     const buttonLabel = !isLoggedIn ? 'Connexion requise' : isAdmin ? 'Admin' : 'Ajouter';
@@ -9,7 +11,7 @@ export default function ProductCard({ item, isLoggedIn, isAdmin, onAddToCart }) 
                 <h3 className="menu-card-title">{item.name}</h3>
                 <p className="menu-card-description">{item.description}</p>
                 <div className="menu-card-footer">
-                    <span className="price">{Number(item.price).toFixed(2)}€</span>
+                    <span className="price">{formatMoney(item.price)}</span>
                     <button
                         type="button"
                         className="add-to-cart"

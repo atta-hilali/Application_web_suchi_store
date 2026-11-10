@@ -2,26 +2,16 @@
 
 namespace App\Http\Requests\Order;
 
-use App\Enums\DeliveryType;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
-
-class StoreOrderRequest extends FormRequest
+class StoreOrderRequest extends QuoteOrderRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function rules(): array
     {
-        return [
-            'delivery_type' => ['required', new Enum(DeliveryType::class)],
+        return [...parent::rules(),
             'delivery_address' => ['nullable', 'string', 'max:1000', 'required_if:delivery_type,delivery'],
             'comments' => ['nullable', 'string', 'max:1500'],
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
-            'items.*.quantity' => ['required', 'integer', 'min:1'],
+            'contact_phone' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9 ()-]{8,30}$/'],
+            'idempotency_key' => ['required', 'uuid'],
+            'quote_token' => ['required', 'string', 'max:10000'],
         ];
     }
 

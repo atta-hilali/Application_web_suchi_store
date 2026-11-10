@@ -39,11 +39,13 @@ class AdminOrderController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $order->update([
+        $updated = Order::query()->whereKey($order->id)->where('status', OrderStatus::PENDING)->update([
             'status' => OrderStatus::ACCEPTED,
             'accepted_at' => now(),
             'rejected_at' => null,
         ]);
+        abort_unless($updated === 1, 409, 'Cette commande a déjà été traitée.');
+        $order->refresh();
 
         return response()->json([
             'message' => 'Commande acceptée.',
@@ -59,11 +61,13 @@ class AdminOrderController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $order->update([
+        $updated = Order::query()->whereKey($order->id)->where('status', OrderStatus::PENDING)->update([
             'status' => OrderStatus::REJECTED,
             'accepted_at' => null,
             'rejected_at' => now(),
         ]);
+        abort_unless($updated === 1, 409, 'Cette commande a déjà été traitée.');
+        $order->refresh();
 
         return response()->json([
             'message' => 'Commande refusée.',

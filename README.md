@@ -1,6 +1,8 @@
 # Miya Sushi
 
-Application web complete pour un restaurant de sushi, construite avec Laravel 11, React 18 et Vite.
+Application web complete pour un restaurant de sushi, construite avec Laravel 12, React 18 et Vite 8.
+
+Les commandes utilisent TND (3 decimales) et l'heure de Tunis. Voir [OPERATIONS.md](OPERATIONS.md) pour les parametres de livraison/horaires, les alertes et la procedure de mise a jour.
 
 Le projet reprend un frontend premium de restaurant japonais et le transforme en application complete avec :
 
@@ -82,9 +84,9 @@ Le projet utilise une SPA React servie par Laravel, avec authentification Sanctu
 ## Stack technique
 
 - PHP 8.2+
-- Laravel 11
+- Laravel 12
 - React 18
-- Vite 6
+- Vite 8
 - Laravel Sanctum
 - MySQL par defaut
 - SQLite possible pour certains tests ou usages locaux
@@ -146,7 +148,7 @@ Avant de lancer le projet, il faut disposer de :
 
 - PHP 8.2 ou plus recent
 - Composer
-- Node.js 20+ et npm
+- Node.js 22.12+ ou 24 et npm
 - MySQL 8+ ou MariaDB
 
 Option Windows / XAMPP :
@@ -394,6 +396,7 @@ php artisan test
 - `GET /api/categories`
 - `POST /api/register`
 - `POST /api/login`
+- `GET /api/restaurant-settings`
 
 ### Authentifie
 
@@ -401,11 +404,14 @@ php artisan test
 - `GET /api/me`
 - `GET /api/orders`
 - `POST /api/orders`
+- `POST /api/orders/quote` (devis signe requis avant creation de commande ; voir OPERATIONS.md)
 - `GET /api/orders/{order}`
 
 ### Admin
 
 - `GET /api/admin/dashboard`
+- `PUT /api/admin/restaurant-settings`
+- `POST /api/admin/hero-media` (fond d'accueil : image ou video, import ou lien direct HTTPS)
 - `GET /api/admin/orders`
 - `GET /api/admin/orders/{order}`
 - `PATCH /api/admin/orders/{order}/accept`

@@ -15,10 +15,12 @@ use Database\Seeders\ProductSeeder;
 use Database\Seeders\RestaurantSettingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Tests\Concerns\InteractsWithCheckout;
 use Tests\TestCase;
 
 class MiyaSushiApiTest extends TestCase
 {
+    use InteractsWithCheckout;
     use RefreshDatabase;
 
     protected User $admin;
@@ -45,6 +47,7 @@ class MiyaSushiApiTest extends TestCase
         $this->client = User::query()->where('email', 'client@gmail.com')->firstOrFail();
         $this->firstProduct = Product::query()->orderBy('id')->firstOrFail();
         $this->secondProduct = Product::query()->orderBy('id')->skip(1)->firstOrFail();
+        $this->configureCheckout();
     }
 
     public function test_client_can_register(): void
@@ -109,15 +112,16 @@ class MiyaSushiApiTest extends TestCase
     {
         Sanctum::actingAs($this->client);
 
-        $response = $this->postJson('/api/orders', [
+        $response = $this->postJson('/api/orders', $this->checkoutPayload([
             'delivery_type' => 'delivery',
             'delivery_address' => '12 avenue du Marché, Paris',
+            'delivery_postcode' => '3062',
             'comments' => 'No wasabi please',
             'items' => [
                 ['product_id' => $this->firstProduct->id, 'quantity' => 2],
                 ['product_id' => $this->secondProduct->id, 'quantity' => 1],
             ],
-        ]);
+        ]));
 
         $expectedSubtotal = round((float) $this->firstProduct->price * 2 + (float) $this->secondProduct->price, 2);
 
@@ -136,14 +140,14 @@ class MiyaSushiApiTest extends TestCase
     {
         Sanctum::actingAs($this->client);
 
-        $response = $this->postJson('/api/orders', [
+        $response = $this->postJson('/api/orders', $this->checkoutPayload([
             'delivery_type' => 'takeaway',
             'comments' => 'Fake pricing attempt',
             'total' => 0.01,
             'items' => [
                 ['product_id' => $this->firstProduct->id, 'quantity' => 2, 'price' => 0.01],
             ],
-        ]);
+        ]));
 
         $expectedTotal = round((float) $this->firstProduct->price * 2, 2);
 

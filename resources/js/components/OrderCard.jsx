@@ -1,3 +1,5 @@
+import { formatMoney } from '../lib/money';
+
 function getStatusLabel(order, admin) {
     if (admin) {
         if (order.status === 'pending') {
@@ -45,7 +47,7 @@ export default function OrderCard({ order, admin = false, actionLoadingId = null
             <div>
                 {order.items.map((item) => (
                     <div key={item.id} className="order-item-row">
-                        <strong>{item.product_name}</strong> x{item.quantity} - {Number(item.line_total).toFixed(2)}€
+                        <strong>{item.product_name}</strong> x{item.quantity} - {formatMoney(item.line_total, order.currency)}
                     </div>
                 ))}
             </div>
@@ -56,10 +58,13 @@ export default function OrderCard({ order, admin = false, actionLoadingId = null
                         <strong>Type:</strong> {order.delivery_type === 'delivery' ? '🚚 Livraison' : '📦 À emporter'}
                     </div>
                     <div className="order-total-highlight">
-                        <strong>Total: {Number(order.total).toFixed(2)}€</strong>
+                        <strong>Total: {formatMoney(order.total, order.currency)}</strong>
                     </div>
                 </div>
 
+                {admin && order.contact_phone && <div className="order-extra-line"><strong>Téléphone :</strong> <a href={`tel:${order.contact_phone.replace(/[^+0-9]/g, '')}`}>{order.contact_phone}</a></div>}
+                {Number(order.delivery_fee) > 0 && <div className="order-extra-line">Livraison : {formatMoney(order.delivery_fee, order.currency)}</div>}
+                {order.delivery_postcode && <div className="order-extra-line">Code postal : {order.delivery_postcode}</div>}
                 {order.delivery_address && (
                     <div className="order-extra-line">
                         <strong>Adresse:</strong> {order.delivery_address}

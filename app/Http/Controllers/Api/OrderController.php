@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Order\QuoteOrderRequest;
 use App\Http\Requests\Order\StoreOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
@@ -14,9 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OrderController extends Controller
 {
-    public function __construct(private readonly OrderService $orderService)
-    {
-    }
+    public function __construct(private readonly OrderService $orderService) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -36,7 +35,12 @@ class OrderController extends Controller
         return response()->json([
             'message' => 'Commande créée avec succès.',
             'order' => new OrderResource($order),
-        ], Response::HTTP_CREATED);
+        ], $order->wasRecentlyCreated ? Response::HTTP_CREATED : Response::HTTP_OK);
+    }
+
+    public function quote(QuoteOrderRequest $request): JsonResponse
+    {
+        return response()->json(['quote' => $this->orderService->quote($request->user(), $request->validated())]);
     }
 
     public function show(Request $request, Order $order): JsonResponse

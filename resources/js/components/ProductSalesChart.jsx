@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { formatMoney } from '../lib/money';
 
 const CHART_WIDTH = 760;
 const CHART_HEIGHT = 300;
@@ -94,7 +95,7 @@ export default function ProductSalesChart({ stats }) {
                     <span className="sales-kpi-label">Unites vendues</span>
                 </div>
                 <div className="sales-kpi">
-                    <span className="sales-kpi-value">{Number(selected?.total_revenue ?? 0).toFixed(2)}€</span>
+                    <span className="sales-kpi-value">{formatMoney(selected?.total_revenue)}</span>
                     <span className="sales-kpi-label">Chiffre d'affaires</span>
                 </div>
                 <div className="sales-kpi">
@@ -237,7 +238,7 @@ export default function ProductSalesChart({ stats }) {
                                     </span>
                                     <span className="sales-ranking-qty">{product.total_quantity}</span>
                                     <span className="sales-ranking-revenue">
-                                        {Number(product.total_revenue).toFixed(2)}€
+                                        {formatMoney(product.total_revenue)}
                                     </span>
                                 </button>
                             );

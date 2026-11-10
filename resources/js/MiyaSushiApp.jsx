@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useOrderUpdates } from './hooks/useOrderUpdates';
 import AdminPanel from './components/AdminPanel';
 import Footer from './components/Footer';
 import CartModal from './components/CartModal';
@@ -23,6 +24,7 @@ import {
     fetchCurrentUser,
     fetchOrders,
     fetchProducts,
+    fetchRestaurantSettings,
     login,
     logout,
     register,
@@ -59,28 +61,41 @@ export default function MiyaSushiApp() {
     });
     const [salesStats, setSalesStats] = useState(null);
     const [cart, setCart] = useState([]);
-    const [deliveryType, setDeliveryType] = useState('delivery');
+    const [restaurantSettings, setRestaurantSettings] = useState(null);
+    const [deliveryType, setDeliveryType] = useState('takeaway');
+    const [deliveryPostcode, setDeliveryPostcode] = useState('');
+    const [contactPhone, setContactPhone] = useState('');
     const [deliveryAddress, setDeliveryAddress] = useState('');
     const [comments, setComments] = useState('');
     const [toast, setToast] = useState(null);
+    const submission = useRef(null);
+    const submittingRef = useRef(false);
 
     const isLoggedIn = Boolean(user);
     const isAdmin = user?.role === 'admin';
+    const pendingCount = adminOrders.filter(order => order.status === 'pending').length;
+    const updates = useOrderUpdates({
+        user, onOrders: setOrders, onAdminOrders: setAdminOrders, onDashboard: setDashboard,
+        onSettings: setRestaurantSettings,
+        onNewOrders: newOrders => {
+            setToast({ type: 'success', message: `${newOrders.length} nouvelle(s) commande(s) reçue(s).` });
+        },
+    });
+
+    useEffect(() => {
+        document.title = isAdmin && pendingCount ? `(${pendingCount}) Commandes en attente — Miya Sushi` : 'Miya Sushi';
+        return () => { document.title = 'Miya Sushi'; };
+    }, [isAdmin, pendingCount]);
 
     const filteredItems = useMemo(
         () => products.filter((item) => item.category_slug === activeTab),
         [activeTab, products],
     );
 
-    const cartSubtotal = useMemo(
-        () => cart.reduce((total, item) => total + Number(item.price) * item.quantity, 0),
-        [cart],
-    );
-
     useEffect(() => {
         const bootstrap = async () => {
             try {
-                await Promise.all([loadCatalog(), loadCurrentUser()]);
+                await Promise.all([loadCatalog(), loadCurrentUser(), fetchRestaurantSettings().then(setRestaurantSettings).catch(() => {})]);
             } finally {
                 setLoadingApp(false);
             }
@@ -95,6 +110,8 @@ export default function MiyaSushiApp() {
         }
     }, [deliveryAddress, user]);
 
+    useEffect(() => { setContactPhone(user?.phone ?? ''); }, [user?.id]);
+
     useEffect(() => {
         if (!toast) {
             return undefined;
@@ -104,12 +121,6 @@ export default function MiyaSushiApp() {
 
         return () => window.clearTimeout(timeoutId);
     }, [toast]);
-
-    useEffect(() => {
-        if (isLoggedIn && !isAdmin) {
-            loadUserOrders();
-        }
-    }, [isAdmin, isLoggedIn]);
 
     useEffect(() => {
         if (currentPage === 'admin' && isAdmin) {
@@ -190,6 +201,7 @@ export default function MiyaSushiApp() {
 
     const navigate = (page) => {
         setCurrentPage(page);
+        if (page === 'orders') updates.refresh();
     };
 
     const addToCart = (item) => {
@@ -208,12 +220,12 @@ export default function MiyaSushiApp() {
             if (existingItem) {
                 return currentCart.map((cartItem) =>
                     cartItem.id === item.id
-                        ? { ...cartItem, quantity: cartItem.quantity + 1 }
+                        ? { ...cartItem, quantity: Math.min(cartItem.quantity + 1, restaurantSettings?.max_quantity ?? 99) }
                         : cartItem,
                 );
             }
 
-            return [...currentCart, { ...item, quantity: 1 }];
+            return currentCart.length >= (restaurantSettings?.max_items ?? 50) ? currentCart : [...currentCart, { ...item, quantity: 1 }];
         });
 
         setShowCartModal(true);
@@ -224,7 +236,7 @@ export default function MiyaSushiApp() {
             currentCart
                 .map((item) =>
                     item.id === itemId
-                        ? { ...item, quantity: item.quantity + delta }
+                        ? { ...item, quantity: Math.min(item.quantity + delta, restaurantSettings?.max_quantity ?? 99) }
                         : item,
                 )
                 .filter((item) => item.quantity > 0),
@@ -274,6 +286,10 @@ export default function MiyaSushiApp() {
             setOrders([]);
             setAdminOrders([]);
             setCart([]);
+            submission.current = null;
+            setDeliveryAddress('');
+            setDeliveryPostcode('');
+            setComments('');
             setCurrentPage('home');
             showSuccess('Deconnexion reussie.');
         } catch (error) {
@@ -281,17 +297,20 @@ export default function MiyaSushiApp() {
         }
     };
 
-    const handlePlaceOrder = async () => {
-        if (cart.length === 0) {
+    const handlePlaceOrder = async (quote) => {
+        if (cart.length === 0 || submittingRef.current || !quote?.quote_token) {
             return;
         }
 
+        submittingRef.current = true;
         setOrderSubmitting(true);
 
         try {
             const payload = {
                 delivery_type: deliveryType,
                 delivery_address: deliveryType === 'delivery' ? deliveryAddress : null,
+                delivery_postcode: deliveryType === 'delivery' ? deliveryPostcode : null,
+                contact_phone: contactPhone,
                 comments,
                 items: cart.map((item) => ({
                     product_id: item.id,
@@ -299,7 +318,12 @@ export default function MiyaSushiApp() {
                 })),
             };
 
-            await createOrder(payload);
+            const signature = JSON.stringify(payload);
+            if (submission.current?.signature !== signature) {
+                submission.current = { signature, key: window.crypto.randomUUID() };
+            }
+            await createOrder({ ...payload, quote_token: quote.quote_token, idempotency_key: submission.current.key });
+            submission.current = null;
             await loadUserOrders();
             setCart([]);
             setComments('');
@@ -309,6 +333,7 @@ export default function MiyaSushiApp() {
         } catch (error) {
             showError(extractErrorMessage(error, 'Impossible de creer la commande.'));
         } finally {
+            submittingRef.current = false;
             setOrderSubmitting(false);
         }
     };
@@ -426,7 +451,7 @@ export default function MiyaSushiApp() {
                 <>
                     {currentPage === 'home' && (
                         <>
-                            <Hero onExploreMenu={() => setCurrentPage('menu')} />
+                            <Hero media={restaurantSettings?.hero_media} onExploreMenu={() => setCurrentPage('menu')} />
                             <MenuSection
                                 categories={categories}
                                 activeTab={activeTab}
@@ -469,6 +494,8 @@ export default function MiyaSushiApp() {
                             onToggleProductAvailability={handleToggleProductAvailability}
                             onSaveCategory={handleSaveCategory}
                             onDeleteCategory={handleDeleteCategory}
+                            restaurantSettings={restaurantSettings}
+                            onSettingsSaved={setRestaurantSettings}
                         />
                     )}
                 </>
@@ -500,7 +527,11 @@ export default function MiyaSushiApp() {
                     deliveryType={deliveryType}
                     deliveryAddress={deliveryAddress}
                     comments={comments}
-                    subtotal={cartSubtotal}
+                    settings={restaurantSettings}
+                    deliveryPostcode={deliveryPostcode}
+                    onDeliveryPostcodeChange={setDeliveryPostcode}
+                    contactPhone={contactPhone}
+                    onContactPhoneChange={setContactPhone}
                     submitting={orderSubmitting}
                     onClose={() => setShowCartModal(false)}
                     onUpdateQuantity={updateQuantity}

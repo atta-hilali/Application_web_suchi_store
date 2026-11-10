@@ -12,7 +12,7 @@ enum OrderStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::PENDING => 'En préparation',
+            self::PENDING => 'En attente de confirmation',
             self::ACCEPTED => 'Validée',
             self::REJECTED => 'Annulée',
             self::CANCELLED => 'Annulée',

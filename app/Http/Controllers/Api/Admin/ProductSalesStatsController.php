@@ -38,6 +38,7 @@ class ProductSalesStatsController extends Controller
         $rows = OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->where('orders.status', OrderStatus::ACCEPTED->value)
+            ->where('orders.currency', 'TND')
             ->where('orders.created_at', '>=', $start)
             ->groupBy('order_items.product_id', 'order_items.product_name', DB::raw($monthExpression))
             ->select([
@@ -81,7 +82,7 @@ class ProductSalesStatsController extends Controller
         $overallSeries = $emptySeries;
 
         foreach ($products as $index => $product) {
-            $products[$index]['total_revenue'] = round($product['total_revenue'], 2);
+            $products[$index]['total_revenue'] = round($product['total_revenue'], 3);
 
             foreach ($product['monthly'] as $monthIndex => $quantity) {
                 $overallSeries[$monthIndex] += $quantity;
@@ -95,7 +96,7 @@ class ProductSalesStatsController extends Controller
                 'name' => 'Tous les articles',
                 'monthly' => $overallSeries,
                 'total_quantity' => array_sum($overallSeries),
-                'total_revenue' => round(array_sum(array_column($products, 'total_revenue')), 2),
+                'total_revenue' => round(array_sum(array_column($products, 'total_revenue')), 3),
             ],
         ]);
     }

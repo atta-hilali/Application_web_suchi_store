@@ -15,6 +15,7 @@ class Order extends Model
 
     protected $fillable = [
         'order_number',
+        'currency', 'idempotency_key', 'request_hash', 'delivery_postcode', 'contact_phone',
         'user_id',
         'status',
         'delivery_type',
@@ -32,9 +33,9 @@ class Order extends Model
         return [
             'status' => OrderStatus::class,
             'delivery_type' => DeliveryType::class,
-            'subtotal' => 'decimal:2',
-            'delivery_fee' => 'decimal:2',
-            'total' => 'decimal:2',
+            'subtotal' => 'decimal:3',
+            'delivery_fee' => 'decimal:3',
+            'total' => 'decimal:3',
             'accepted_at' => 'datetime',
             'rejected_at' => 'datetime',
         ];

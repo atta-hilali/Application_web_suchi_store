@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'required' => 'Le champ :attribute est obligatoire.',
+    'required_if' => 'Le champ :attribute est obligatoire pour ce mode de réception.',
+    'present' => 'Le champ :attribute doit être fourni.',
+    'email' => 'Veuillez saisir une adresse email valide.',
+    'unique' => 'Cette valeur est déjà utilisée pour :attribute.',
+    'confirmed' => 'La confirmation de :attribute ne correspond pas.',
+    'string' => 'Le champ :attribute doit être un texte.',
+    'integer' => 'Le champ :attribute doit être un nombre entier.',
+    'numeric' => 'Le champ :attribute doit être un nombre.',
+    'boolean' => 'Le champ :attribute est invalide.',
+    'array' => 'Le champ :attribute doit être une liste.',
+    'regex' => 'Le format du champ :attribute est invalide.',
+    'uuid' => 'La référence de commande est invalide.',
+    'distinct' => 'Le champ :attribute contient un doublon.',
+    'exists' => 'La sélection :attribute est indisponible.',
+    'decimal' => 'Le champ :attribute doit avoir au maximum 3 décimales.',
+    'different' => 'Les champs :attribute et :other doivent être différents.',
+    'date_format' => 'Le champ :attribute doit respecter le format :format.',
+    'between' => ['numeric' => 'Le champ :attribute doit être compris entre :min et :max.'],
+    'min' => ['numeric' => ':attribute doit être au moins :min.', 'string' => ':attribute doit contenir au moins :min caractères.', 'array' => ':attribute doit contenir au moins :min élément(s).'],
+    'max' => ['numeric' => ':attribute ne peut pas dépasser :max.', 'string' => ':attribute ne peut pas dépasser :max caractères.', 'array' => ':attribute ne peut pas dépasser :max éléments.'],
+    'attributes' => ['contact_phone' => 'téléphone', 'delivery_postcode' => 'code postal', 'delivery_address' => 'adresse', 'quote_token' => 'total du panier', 'items' => 'panier', 'items.*.quantity' => 'quantité', 'delivery_fee' => 'frais de livraison', 'minimum_order_amount' => 'minimum de commande', 'delivery_postcodes' => 'codes postaux desservis'],
+];

@@ -4,7 +4,7 @@
             box-sizing: border-box;
         }
 
-        :root {
+:root {
             --black: #0a0a0a;
             --charcoal: #1c1c1c;
             --dark-gray: #2a2a2a;
@@ -217,11 +217,10 @@
         .hero {
             position: relative;
             height: 85vh;
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), 
-                        url('https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=1600&q=90');
+            background-color: #15110f;
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            isolation: isolate;
             color: var(--white);
             display: flex;
             align-items: center;
@@ -237,7 +236,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 30% 50%, rgba(198, 40, 40, 0.25), transparent 60%);
+            z-index: 1;
+            pointer-events: none;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), radial-gradient(circle at 30% 50%, rgba(198, 40, 40, 0.25), transparent 60%);
         }
 
         .hero:after {
@@ -247,12 +248,14 @@
             left: 0;
             right: 0;
             bottom: 0;
+            z-index: 1;
+            pointer-events: none;
             background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
         }
 
         .hero-content {
             position: relative;
-            z-index: 1;
+            z-index: 2;
             max-width: 1000px;
             padding: 0 2rem;
         }
@@ -1662,3 +1665,25 @@ textarea.form-input {
         padding: 1.25rem 1.5rem;
     }
 }
+
+.checkout-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.checkout-fields .form-group, .restaurant-settings .form-group { display: block; margin-top: 1rem; }
+.checkout-fields .cart-total .btn { margin-top: 0.75rem; }
+.checkout-fields .total-row { gap: 1rem; margin-bottom: 0.5rem; }
+.restaurant-settings { max-width: 900px; margin: 2rem auto; padding: 1.5rem; }
+.restaurant-settings .checkbox-row { margin: 0.75rem 0; }
+.settings-days { display: flex; flex-wrap: wrap; gap: 1rem; }
+.order-header > div { min-width: 0; }
+.order-number { overflow-wrap: anywhere; }
+.restaurant-settings fieldset { margin: 1rem 0; border: 1px solid #ddd; padding: 1rem; }
+
+.hero-background-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+.hero-video-toggle { position: absolute; bottom: 1.25rem; right: 1.25rem; z-index: 3; width: 42px; height: 42px; border: 1px solid rgba(255,255,255,.65); border-radius: 50%; background: rgba(0,0,0,.4); color: white; cursor: pointer; font-size: 1rem; }
+.hero-video-toggle:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+.hero-media-settings { max-width: 960px; margin: 2rem auto; padding: 1.5rem; }
+.hero-media-settings .form-group { display: block; margin-top: 1rem; }
+.hero-media-fields { min-width: 0; margin: 1rem 0 0; padding: 0; border: 0; }
+.hero-media-fields > fieldset { padding: 1rem; border: 1px solid #ddd; }
+.hero-media-preview { margin: 1.5rem 0; aspect-ratio: 16/9; overflow: hidden; border-radius: 12px; background: #171717; display: grid; place-items: center; color: #fff; }
+.hero-media-preview img, .hero-media-preview video { width: 100%; height: 100%; object-fit: cover; }
+@media (prefers-reduced-motion: reduce) { .hero-background-video { display: none; } }

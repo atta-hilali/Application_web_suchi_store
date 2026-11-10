@@ -116,6 +116,29 @@ export async function createOrder(payload) {
     return response.data;
 }
 
+export async function quoteOrder(payload) {
+    return (await api.post('/api/orders/quote', payload)).data.quote;
+}
+
+export async function fetchRestaurantSettings() {
+    return (await api.get('/api/restaurant-settings')).data.settings;
+}
+
+export async function saveRestaurantSettings(settings) {
+    return (await api.put('/api/admin/restaurant-settings', settings)).data.settings;
+}
+
+export async function saveHeroMedia({ mediaType, source, file, url }, onProgress) {
+    const payload = new FormData();
+    payload.append('media_type', mediaType);
+    payload.append('source', source);
+    if (source === 'upload' && file) payload.append('file', file);
+    if (source === 'url') payload.append('url', url);
+    return (await api.post('/api/admin/hero-media', payload, {
+        onUploadProgress: event => { if (event.total) onProgress?.(Math.round(event.loaded * 100 / event.total)); },
+    })).data.hero_media;
+}
+
 export async function fetchAdminDashboard() {
     const response = await api.get('/api/admin/dashboard');
 

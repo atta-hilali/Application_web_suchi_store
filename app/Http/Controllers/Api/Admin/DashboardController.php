@@ -24,6 +24,7 @@ class DashboardController extends Controller
             'today_orders_count' => Order::query()->whereDate('created_at', $today)->count(),
             'pending_orders_count' => Order::query()->where('status', OrderStatus::PENDING)->count(),
             'today_revenue' => (float) Order::query()
+                ->where('currency', 'TND')
                 ->where('status', OrderStatus::ACCEPTED)
                 ->whereDate('accepted_at', $today)
                 ->sum('total'),

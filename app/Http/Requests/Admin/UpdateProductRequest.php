@@ -12,7 +12,7 @@ class UpdateProductRequest extends StoreProductRequest
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255', 'unique:products,name,'.$productId],
             'description' => ['required', 'string', 'max:1000'],
-            'price' => ['required', 'numeric', 'min:0'],
+            'price' => ['required', 'numeric', 'decimal:0,3', 'min:0', 'max:99999.999'],
             'image_url' => ['nullable', 'url', 'max:2048'],
             'image_upload' => ['nullable', 'file', 'image', 'max:4096'],
             'is_new' => ['required', 'boolean'],
