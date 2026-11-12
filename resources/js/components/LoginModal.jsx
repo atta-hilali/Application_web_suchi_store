@@ -94,7 +94,6 @@ export default function LoginModal({
                             <button type="submit" className="btn btn-primary full-width" disabled={submitting}>
                                 {submitting ? 'Connexion...' : 'Se connecter'}
                             </button>
-                            <p className="form-hint">Admin: admin@gmail.com / 123</p>
                         </form>
                     ) : (
                         <form onSubmit={handleRegisterSubmit}>
